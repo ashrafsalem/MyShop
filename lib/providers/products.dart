@@ -38,29 +38,34 @@ class Products extends ChangeNotifier{
     ),
   ];
 
-  var _Favorite = false;
+  // var _Favorite = false;
 
   List<Product> get items{
-    if(_Favorite) {
-      return _items.where((item) => item.isFavorite).toList();
-    } else {
-      return [..._items];
-    }
+    return [..._items];
+    // if(_Favorite) {
+    //   return _items.where((item) => item.isFavorite).toList();
+    // } else {
+    //  return [..._items];
+    // }
+  }
+
+  List<Product> get favoriteItems{
+    return _items.where((pro) => pro.isFavorite).toList();
   }
 
   Product findByID(String id){
     return items.firstWhere((prod) => prod.id == id);
   }
 
-  void showFavoritesOnly(){
-    _Favorite = true;
-    notifyListeners();
-  }
-
-  void showAll() {
-    _Favorite = false;
-    notifyListeners();
-  }
+  // void showFavoritesOnly(){
+  //   _Favorite = true;
+  //   notifyListeners();
+  // }
+  //
+  // void showAll() {
+  //   _Favorite = false;
+  //   notifyListeners();
+  // }
   void addProduct(){
     notifyListeners();
   }
