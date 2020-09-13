@@ -48,6 +48,21 @@ class ProductItem extends StatelessWidget {
             ),
             onPressed: (){
               cart.addItem(pro.id, pro.title, pro.price);
+              Scaffold.of(context).hideCurrentSnackBar();
+              Scaffold.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Added Item To the card!'
+                  ),
+                  duration: Duration(seconds: 2),
+                  action: SnackBarAction(
+                    label: 'UMDO',
+                    onPressed: (){
+                      cart.removeSingleItem(pro.id);
+                    },
+                  ),
+                ),
+              );
             },
           ),
         ),
