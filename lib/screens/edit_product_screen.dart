@@ -27,6 +27,8 @@ class _EditProductScreenState extends State<EditProductScreen> {
   );
 
   var _isIinit = true;
+  var _isLoading = false;
+
   var _initValues = {
     'title': '',
     'description': '',
@@ -88,13 +90,23 @@ class _EditProductScreenState extends State<EditProductScreen> {
       return;
     }
     _form.currentState.save();
+    setState(() {
+      _isLoading = true;
+    });
     if(_existingProduct.id != null){
       Provider.of<Products>(context, listen: false).updateProduct(_existingProduct.id, _existingProduct);
+      Navigator.of(context).pop();
+      setState(() {
+        _isLoading = true;
+      });
     }else {
-      Provider.of<Products>(context, listen: false).addProduct(_existingProduct);
+      Provider.of<Products>(context, listen: false).addProduct(_existingProduct).then((_){
+        Navigator.of(context).pop();
+        setState(() {
+          _isLoading = true;
+        });
+      });
     }
-
-    Navigator.of(context).pop();
   }
 
   @override
@@ -111,7 +123,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
           ),
         ],
       ),
-      body: Padding(
+      body:_isLoading ? Center( child: CircularProgressIndicator(),) : Padding(
         padding: EdgeInsets.all(16.0),
         child: Form(
           key: _form,
