@@ -68,37 +68,43 @@ class Products extends ChangeNotifier {
   //   notifyListeners();
   // }
   Future<void> addProduct(Product product) {
-    final url = 'https://flutter-update-9681a.firebaseio.com/products.json';
-    return http.post(url, body: json.encode({
-      'title': product.title,
-      'description': product.description,
-      'price': product.price,
-      'imageUrl': product.imageUrl,
-    }),).then((response)  {
+    final url = 'https://flutter-update-9681a.firebaseio.com/products';
+    return http
+        .post(
+      url,
+      body: json.encode({
+        'title': product.title,
+        'description': product.description,
+        'price': product.price,
+        'imageUrl': product.imageUrl,
+      }),
+    )
+        .then((response) {
       final newProduct = Product(
-      title: product.title,
-      price: product.price,
-      description: product.description,
-      imageUrl: product.imageUrl,
-      id: json.decode(response.body)['name'],
+        title: product.title,
+        price: product.price,
+        description: product.description,
+        imageUrl: product.imageUrl,
+        id: json.decode(response.body)['name'],
       );
-    _items.add(newProduct);
-    notifyListeners();
+      _items.add(newProduct);
+      notifyListeners();
+    }).catchError((error) {
+      print(error);
+      throw error;
     });
-
   }
 
-  void updateProduct(String productID, Product newProduct){
+  void updateProduct(String productID, Product newProduct) {
     final productIndex = _items.indexWhere((prod) => prod.id == productID);
-    if(productIndex >= 0){
+    if (productIndex >= 0) {
       _items[productIndex] = newProduct;
       notifyListeners();
     }
   }
 
-  void deleteProduct(String productID){
+  void deleteProduct(String productID) {
     _items.removeWhere((prod) => prod.id == productID);
     notifyListeners();
-
   }
 }
