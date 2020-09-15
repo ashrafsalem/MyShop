@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import './product.dart';
 
 class Products extends ChangeNotifier {
@@ -67,6 +68,13 @@ class Products extends ChangeNotifier {
   //   notifyListeners();
   // }
   void addProduct(Product product) {
+    final url = 'https://flutter-update-9681a.firebaseio.com/products.json';
+    http.post(url, body: json.encode({
+      'title': product.title,
+      'description': product.description,
+      'price': product.price,
+      'imageUrl': product.imageUrl,
+    }));
     final newProduct = Product(
       title: product.title,
       price: product.price,
@@ -76,5 +84,19 @@ class Products extends ChangeNotifier {
     );
     _items.add(newProduct);
     notifyListeners();
+  }
+
+  void updateProduct(String productID, Product newProduct){
+    final productIndex = _items.indexWhere((prod) => prod.id == productID);
+    if(productIndex >= 0){
+      _items[productIndex] = newProduct;
+      notifyListeners();
+    }
+  }
+
+  void deleteProduct(String productID){
+    _items.removeWhere((prod) => prod.id == productID);
+    notifyListeners();
+
   }
 }
