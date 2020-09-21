@@ -69,7 +69,7 @@ class Products extends ChangeNotifier {
   //   notifyListeners();
   // }
 
-  Future<void> FetchAndSetProduct() async {
+  Future<void> fetchAndSetProduct() async {
     const url = 'https://flutter-update-9681a.firebaseio.com/products.json';
     try {
       final response = await http.get(url);
@@ -78,12 +78,14 @@ class Products extends ChangeNotifier {
 
       extractDta.forEach((prodId, prodData) {
         loadedData.add(Product(
-          id: prodId,
-          title: prodData['title'],
-          description: prodData['description'],
-          price: prodData['proce'],
-          imageUrl: prodData['imageUrl'],
-        ));
+            id: prodId,
+            title: prodData['title'],
+            description: prodData['description'],
+            price: prodData['price'],
+            imageUrl: prodData['imageUrl'],
+            isFavorite: prodData['isFavorite'] == null
+                ? false
+                : prodData['isFavorite']));
       });
 
       _items = loadedData;

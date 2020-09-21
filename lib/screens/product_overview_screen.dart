@@ -33,7 +33,7 @@ class _ProductOverViewScreenState extends State<ProductOverViewScreen> {
       setState(() {
         _isLoaded = true;
       });
-      Provider.of<Products>(context).FetchAndSetProduct().then((_) {
+      Provider.of<Products>(context).fetchAndSetProduct().then((_) {
         setState(() {
           _isLoaded = false;
         });
