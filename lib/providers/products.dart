@@ -42,6 +42,9 @@ class Products extends ChangeNotifier {
 
   // var _Favorite = false;
 
+  String token;
+  Products(this.token, this._items);
+
   List<Product> get items {
     return [..._items];
     // if(_Favorite) {
@@ -70,7 +73,8 @@ class Products extends ChangeNotifier {
   // }
 
   Future<void> fetchAndSetProduct() async {
-    const url = 'https://flutter-update-9681a.firebaseio.com/products.json';
+    final url =
+        'https://flutter-update-9681a.firebaseio.com/products.json?auth=$token';
     try {
       final response = await http.get(url);
       final extractedData = json.decode(response.body) as Map<String, dynamic>;

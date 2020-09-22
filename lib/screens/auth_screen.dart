@@ -1,6 +1,9 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth.dart';
+import '../models/http_exception.dart';
 
 enum AuthMode { Signup, Login }
 
@@ -59,7 +62,8 @@ class AuthScreen extends StatelessWidget {
                       child: Text(
                         'MyShop',
                         style: TextStyle(
-                          color: Theme.of(context).accentTextTheme.title.color,
+                          color:
+                              Theme.of(context).accentTextTheme.headline6.color,
                           fontSize: 50,
                           fontFamily: 'Anton',
                           fontWeight: FontWeight.normal,
@@ -100,7 +104,24 @@ class _AuthCardState extends State<AuthCard> {
   var _isLoading = false;
   final _passwordController = TextEditingController();
 
-  void _submit() {
+  void _showErrorDialogBox(String message) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('An Error Occured'),
+        content: Text(message),
+        actions: [
+          FlatButton(
+              child: Text('okey'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              }),
+        ],
+      ),
+    );
+  }
+
+  void _submit() async {
     if (!_formKey.currentState.validate()) {
       // Invalid!
       return;
@@ -109,11 +130,35 @@ class _AuthCardState extends State<AuthCard> {
     setState(() {
       _isLoading = true;
     });
-    if (_authMode == AuthMode.Login) {
-      // Log user in
-    } else {
-      // Sign user up
+    try {
+      if (_authMode == AuthMode.Login) {
+        await Provider.of<Auth>(context, listen: false)
+            .signin(_authData['email'], _authData['password']);
+      } else {
+        await Provider.of<Auth>(context, listen: false)
+            .signup(_authData['email'], _authData['password']);
+      }
+    } on HttpException catch (error) {
+      // on key word to target specific error exception with in our case HttpException
+      var errorMessage = "cannot authenticate right now";
+      // error.toString -> call HttpException toString function that return the message
+      if (error.toString().contains('EMAIL_EXISTS')) {
+        errorMessage = 'This Email Already Exist';
+      } else if (error.toString().contains('INVALID_EMAIL')) {
+        errorMessage = 'This Email Is Not Valid';
+      } else if (error.toString().contains('WEAK_PASSWORD')) {
+        errorMessage = 'Password must be bigger than 6 characters';
+      } else if (error.toString().contains('EMAIL_NOT_FOUND')) {
+        errorMessage = 'This Email Is Not Found';
+      }
+
+      _showErrorDialogBox(errorMessage);
+    } catch (error) {
+      var errorMessage =
+          "Cannot authenticate right now , please try again later";
+      _showErrorDialogBox(errorMessage);
     }
+
     setState(() {
       _isLoading = false;
     });
