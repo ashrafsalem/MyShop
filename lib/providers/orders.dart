@@ -25,8 +25,8 @@ class Orders with ChangeNotifier {
   }
 
   Future<void> fetchAndSetOrders() async {
-    final url = 'https://flutter-update-9681a.firebaseio.com/orders.json';
-    final loadedOrders = [];
+    const url = 'https://flutter-update-9681a.firebaseio.com/orders.json';
+    final List<OrderItem> loadedOrders = [];
     final response = await http.get(url);
     final extractedData = json.decode(response.body) as Map<String, dynamic>;
     if (extractedData == null) {
@@ -38,17 +38,19 @@ class Orders with ChangeNotifier {
           id: orderId,
           amount: orderData['amount'],
           dateTime: DateTime.parse(orderData['dateTime']),
-          products: (orderData['products'] as List<dynamic>).map(
-            (item) => CartItem(
-                id: item['id'],
-                price: item['price'],
-                quantity: item['quantity'],
-                title: item['title']),
-          ),
+          products: (orderData['products'] as List<dynamic>)
+              .map(
+                (item) => CartItem(
+                    id: item['id'],
+                    price: item['price'],
+                    quantity: item['quantity'],
+                    title: item['title']),
+              )
+              .toList(),
         ),
       );
     });
-    print(loadedOrders.reversed.toList());
+
     _orders = loadedOrders.reversed.toList();
     notifyListeners();
   }
