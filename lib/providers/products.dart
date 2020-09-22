@@ -73,10 +73,12 @@ class Products extends ChangeNotifier {
     const url = 'https://flutter-update-9681a.firebaseio.com/products.json';
     try {
       final response = await http.get(url);
-      final extractDta = json.decode(response.body) as Map<String, dynamic>;
+      final extractedData = json.decode(response.body) as Map<String, dynamic>;
       final List<Product> loadedData = [];
-
-      extractDta.forEach((prodId, prodData) {
+      if (extractedData == null) {
+        return;
+      }
+      extractedData.forEach((prodId, prodData) {
         loadedData.add(Product(
             id: prodId,
             title: prodData['title'],
