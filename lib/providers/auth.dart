@@ -18,8 +18,11 @@ class Auth extends ChangeNotifier {
         _token != null) {
       return _token;
     }
-
     return null;
+  }
+
+  String get userId {
+    return _userId;
   }
 
   Future<void> _authentication(
@@ -39,7 +42,7 @@ class Auth extends ChangeNotifier {
         throw HttpException(responseData['error']['message']);
       }
       _token = responseData['idToken'];
-      _userId = responseData['localid'];
+      _userId = responseData['localId'];
       _expiryDate = DateTime.now()
           .add(Duration(seconds: int.parse(responseData['expiresIn'])));
       notifyListeners();

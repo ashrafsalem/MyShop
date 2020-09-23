@@ -42,8 +42,9 @@ class Products extends ChangeNotifier {
 
   // var _Favorite = false;
 
-  String token;
-  Products(this.token, this._items);
+  final String token;
+  final String userId;
+  Products(this.token, this.userId, this._items);
 
   List<Product> get items {
     return [..._items];
@@ -72,9 +73,11 @@ class Products extends ChangeNotifier {
   //   notifyListeners();
   // }
 
-  Future<void> fetchAndSetProduct() async {
-    final url =
-        'https://flutter-update-9681a.firebaseio.com/products.json?auth=$token';
+  Future<void> fetchAndSetProduct([bool filtered = false]) async {
+    final filteredString =
+        filtered ? 'orderBy="creatorId"&equalTo=$userId' : '';
+    var url =
+        'https://flutter-update-9681a.firebaseio.com/products.json?auth=$token&$filteredString'; // orderBy="creatorId"&equalTo=$userId that way only firebase offer to do filtering by user
     try {
       final response = await http.get(url);
       final extractedData = json.decode(response.body) as Map<String, dynamic>;
@@ -82,16 +85,24 @@ class Products extends ChangeNotifier {
       if (extractedData == null) {
         return;
       }
+      // here we change url declaration to var to re-use it in this location
+      url =
+          'https://flutter-update-9681a.firebaseio.com/userFavorites/$userId.json?auth=$token';
+      final favoriteResponse = await http.get(url);
+      final favoriteData = json.decode(favoriteResponse.body);
+
       extractedData.forEach((prodId, prodData) {
         loadedData.add(Product(
-            id: prodId,
-            title: prodData['title'],
-            description: prodData['description'],
-            price: prodData['price'],
-            imageUrl: prodData['imageUrl'],
-            isFavorite: prodData['isFavorite'] == null
-                ? false
-                : prodData['isFavorite']));
+          id: prodId,
+          title: prodData['title'],
+          description: prodData['description'],
+          price: prodData['price'],
+          imageUrl: prodData['imageUrl'],
+          isFavorite: favoriteData == null
+              ? false
+              : favoriteData[prodId] ??
+                  false, // just get the value umder fav -> with the user id -> for this product, ?? operator if the left oprand is true ok if not return the right oprand
+        ));
       });
 
       _items = loadedData;
@@ -102,7 +113,8 @@ class Products extends ChangeNotifier {
   }
 
   Future<void> addProduct(Product product) async {
-    final url = 'https://flutter-update-9681a.firebaseio.com/products.json';
+    final url =
+        'https://flutter-update-9681a.firebaseio.com/products.json?auth=$token';
     try {
       final response = await http.post(
         url,
@@ -111,6 +123,7 @@ class Products extends ChangeNotifier {
           'description': product.description,
           'price': product.price,
           'imageUrl': product.imageUrl,
+          'creatorId': userId,
         }),
       );
 
@@ -133,7 +146,7 @@ class Products extends ChangeNotifier {
     final productIndex = _items.indexWhere((prod) => prod.id == productID);
     if (productIndex >= 0) {
       final url =
-          'https://flutter-update-9681a.firebaseio.com/products/$productID.json';
+          'https://flutter-update-9681a.firebaseio.com/products/$productID.json?auth=$token';
       await http.patch(url,
           body: json.encode({
             'title': newProduct.title,
@@ -148,7 +161,7 @@ class Products extends ChangeNotifier {
 
   Future<void> deleteProduct(String productID) async {
     final url =
-        'https://flutter-update-9681a.firebaseio.com/products/$productID.json';
+        'https://flutter-update-9681a.firebaseio.com/products/$productID.json?auth=$token';
     final productIndex = _items.indexWhere((prod) => prod.id == productID);
     var existingItem = _items[productIndex];
     _items.removeWhere((prod) => prod.id == productID);
